@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html ng-app="listaTelefonica">
+
+<head>
+    <meta charse="UTF-8">
+    <title> Lista Telefonica </title>
+
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/bootstrap.css">
+
+    <style>
+    
+    .jumbotron {
+    
+        width: 70%;
+        text-align: center;
+        margin-top: 20px;
+        margin-left: auto;
+        margin-right: auto;
+
+    }
+
+    .body {
+
+        background-color: #581919;
+
+    }
+
+    .table {
+
+        margin-top: 20px;
+   
+    }
+
+    .form-control {
+
+        margin-bottom: 5px;
+
+    }
+
+    .selecionado {
+
+        background-color: rgb(154, 210, 255);
+
+    }
+    
+    </style>
+
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular/angular-messages.js"></script>
+
+    <script>
+    
+        angular.module("listaTelefonica", ["ngMessages"]);
+
+        angular.module("listaTelefonica").controller("listaTelefonicaCrtl", function ($scope){
+
+            $scope.app = "Lista Telefonica";
+
+            $scope.contatos = [
+                {nome: "Pedro", telefone: "99998888", data: new Date(), operadora:{nome: "Oi", codigo: "14"}},
+                {nome: "Ana", telefone: "99998877", data: new Date(), operadora:{nome: "Vivo", codigo: "15"}},
+                {nome: "Maria", telefone: "99998866", data: new Date(), operadora:{nome: "Claro", codigo: "17"}}
+            ];
+
+            $scope.operadoras = [
+                {nome: "Oi", codigo: 14, preco: 15},
+                {nome: "Vivo", codigo: 15, preco: 10},
+                {nome: "Tim", codigo: 41, preco: 5},
+                {nome: "Claro", codigo: 17, preco: 17}
+            ];
+
+            $scope.adicionarContato = function (contato) {
+                $scope.contatos.push(angular.copy(contato));
+                delete $scope.contato;
+                $scope.contatoForm.$setPristine();
+            };
+
+            $scope.apagarContatos = function (contatos) {
+                $scope.contatos = contatos.filter(function (contato) {
+                    if (!contato.selecionado) return contato;
+                });
+                console.log(contatosSelecionados);
+            };
+
+            $scope.isContatoSelecionado = function (contatos) {
+                return contatos.some(function (contato) {
+                    return contato.selecionado;
+                });
+                console.log(isContatoSelecionado);
+            };
+
+            $scope.ordenarPor = function(campo) {
+                $scope.criterioOrdenacao = campo;
+                $scope.direcaoOrdenacao = !$scope.direcaoOrdenacao;
+            }
+
+        });
+
+    </script>
+
+</head>
+
+<body ng-controller="listaTelefonicaCrtl" class="body">
+    
+    <div class="jumbotron"> 
+
+        <h3> {{app}} </h3>
+        <input class="form-control" type="text" ng-model="criterioBusca" placeholder="Pesquisar">
+        <table class="table">
+        <tr>
+            <th></th>
+            <th> <a href="" ng-click="ordenarPor('nome')">Nome </a></th>
+            <th> <a href="" ng-click="ordenarPor('telefone')">Telefone </a></th>
+            <th>Operadora</th>
+            <th>Data</th>
+        </tr> 
+        <tr ng-class="{selecionado: contato.selecionado}" ng-repeat="contato in contatos | filter:criterioBusca | orderBy:criterioOrdenacao:direcaoOrdenacao">
+            <td><input type="checkbox" ng-model="contato.selecionado"/></td>
+            <td>{{contato.nome | uppercase}}</td>
+            <td>{{contato.telefone}}</td>
+            <td>{{contato.operadora.nome | lowercase}}</td>
+            <td>{{contato.data | date:'dd/MM/yyyy'}}</td>
+        </tr>
+        </table>
+        <hr/>
+
+        <form name="contatoForm">
+            <input maxlength="10" minlength="5" class="form-control" type="text" ng-model="contato.nome" name="nome" placeholder="Nome" ng-required="true"/>
+            <input maxlength="10" class="form-control" type="text" ng-model="contato.telefone" name="telefone" placeholder="Telefone" ng-required="true" ng-pattern="/^\d{4,5}-\d{4}$/"/>
+            <select class="form-control" ng-model="contato.operadora" ng-options="operadora.nome for operadora in operadoras | orderBy:'nome'">
+                    <option value="">Selecione uma operadora</option>
+            </select>
+        </form>
+
+        <div ng-show="contatoForm.nome.$dirty" ng-messages="contatoForm.nome.$error" class="alert alert-danger">
+
+            <div ng-message="required"> 
+                Campo obrigatório "Nome" não preeenchido!
+            </div>
+
+            <div ng-message="minlength">
+                O campo "Nome" deve ter no minimo 5 caracteres.
+            </div>
+
+        </div>
+
+        <div ng-show="contatoForm.telefone.$error.required && contatoForm.telefone.$dirty" class="alert alert-danger"> 
+            Campo obrigatório "Telefone" não preeenchido!
+        </div>
+
+        <div ng-show="contatoForm.telefone.$error.pattern" class="alert alert-danger"> 
+                O campo "Telefone" deve ter o formato DDDDD-DDDD.
+        </div>
+
+        <button class="btn btn-primary btn-block" ng-click="adicionarContato(contato)" ng-disabled="contatoForm.$invalid"> Adicionar Contato </button>
+        <button class="btn btn-danger btn-block" ng-click="apagarContatos(contatos)" ng-disabled="!isContatoSelecionado(contatos)"> Apagar Contatos </button>
+        
+    </div>
+
+</body>
+
+</html>
+<!--   
+    ngBind : substitui o elemento por uma expressão 
+
+    ngRepeat : Iterando sobre os itens de uma coeção ou de um projeto
+
+    ngModel : Vinculando uma propriedade ao $scope (inverso do ngBind) pega da view e define no scopo aplicada nos input, select e 
+
+    ngClick : Atribuindo um comportamento ao evento (reagi ao click para disparar a inserção de um novo contato)
+
+    ngDisabled : Desabilitando um elemento dinamicamente (podendo desabilitar os campos quando preciso como por exemplo quando nao quer o botao adicionar fique habilitado)
+
+    form e usado para criar um formulario para criar uma validação dos campos, um objeto sera criado no nosso scope para validação que vai receber 
+    informações do ng-required, maxlenght, minlenght e etc. Atraves do form voce consegue consultar a validade dos campos com invalid ou valid
+
+    ngOptions : Rederiza as opções de um select
+
+    ngMinlenght e ngMaxlenght : define o tamanho minimo e maximo dos campos, lembrando que nao e uma mascara, e ele nao vai impedir de que o usuario, podendo
+    criar mensagem para campos com caracteres minimos
+
+    alert alert-danger : e a classe do bootstrap que imprime uma mensagem de erro para poder controlar quando ela sera exibida usamos o ng-show podendo passaar
+    as informações de quando voce quer que seja imprimida ou seja as condições para ser exibida a mensagem
+    
+    $valid e $invalid : com essa funcao nao precisamos usar as verificação de cada atributo dos objetos inseridos, pois assim eles implementam 
+    a classe ng-Requered e obrigatoriamente com true voce torna o campo como obrigatório assim voce pode implementa-los nos botoes de adicionar
+    assim melhorando a visibilidade do código, pois podemos implementar na verificação do campo
+
+    ngRequired : Define um determinado campo obrigatório
+
+    Para rederizar melhor os itens dos options pode se usar o "group by" separando cada item de acordo com cada atributo do objeto
+
+    Mascaras : Podemos usar o terminal com o comando node, assim ira abrir o local onde podemos criar as mascaras para com seguinte instrução
+    {
+        var regexpTelefone = /^\d{4}-\d{4}$/;
+
+        (nesse caso estamos criando uma mascara com ond tera 4 caracteres e mais um "-" entre os numeros seguidos de mais 4 caracteres)
+
+        depois do igual se passa os paramentro de como sera criado o item desejado
+
+        Para testar a mascara podemos usar :
+
+            Para testar usamnos Regex(seguido do nome do item adicionado)
+
+             regexpTelefone.test("999999999")
+
+            passando dentro das aspas uma entrada para pode verificar os campos se e valido, o sistemas retorna true ou false para verificar
+            assim testando a mascara
+    }
+
+    ngClass e ngStyle : aplicando classes do CSS e estilos dinamicamente
+
+    ng-Messages : e uma diretriz para implementar varias mensagens, sendo asim o codigo fica mais claro pois pode implementar cada mensagem de erro de acordo com 
+    o erro gerado assim o codigo fica mais claro pois podemos criar uma div com com todas essas configurações e aplicar em todo seu conteudo interno. 
+    Para usar o ng-Messages temos que colcoar o arquivo "angular-messages.js" dentro da pasta lib/angular , apos isso importa-lo com so <script> apos isso adicionar
+    o nome do ng nesse caso ngMessages dentro das " [] " , podendo aplicar as classes dirty e etc.
+
+    $error : verifica se contem algum erro no formulario como um todo, assim podemos usar tanto o invalid que eu mais preciso em casos especificos e podemos
+    usar tambem o error que verifica o formulario como um todo, usando essa tag podemos colocar as mensagem de erro em ordem como por exemplo um campo que tem 
+    obirgatoriedade e tambem tem o numero minimo de caracteres, sendo que primeiramente podemos enviar exibir mensagem de erro sobre numero minimo de caracteres e
+    antes se preciso campo obrigatorio caso o usuario apague o campo
+
+    ngPattern : Define uma RefExp para validar o campo desejado como por exemplo uma senha ou padroes de campos como por exemplio implementar barra ou ifen em campos, 
+    lembrando que isso nao e uma mascar pois nao impede que o usuario digite mais caracteres ele apenas define uma formula ideal de entrada. Podendo passar no campo desejado um
+    numero maximo e minimo de caracteres com o max e minlength e ainda implementar a funcao pattern com sua formula ideal de campo, lembaro que o "^" indica como o campo
+    devera iniciar e o "$" indica como deve ser o fim do campo, podendo tambem colocar entre chaves os valores ideias nesse caso o campo pode ter 4 ou 5 caracteres naquela área
+
+    $pristine e $dirty : São duas propriedades de contato form booleano se indica se um campo ja foi tocado ou nao, verifica se o campo ja foi modificado
+    pristine vem do ingles como "virgem, mata entocada virgem" uma vez tocada ela nunca mais volta como pristine, sendo assim as mensagem de erro ou outras
+    apenas serao exibidas quando mecherem no no formulario, para controlar isso uma vez adicionado podemos setar o pristine novamente para que possa atualizar o
+    status do campo alterado, uma vez ja alterado o atributo pristine deve ser alterado
+
+    maneira de verificar e implementar configurações do select em itens --ng-class="{selecionado: contato.selecionado}"-- verifica-se se e true ou seja se e selecionado
+
+    podemos simplificar verificações em JS desde que seja string e que usam o mesmo atributo do objeto -- ng-class="{'selecionado negrito'': contato.selecionado}" -- 
+
+    Apagando itens : o ngClick seleciona os itens que deseja ser apagado atraves disso o objeto marcado recebe o atributo selecionado como true
+    assim a função referencia o mesmo array recebendo todos os objeto que nao foram selecionado, assim apagando os selecionados, atraves dos nao selecionado
+    o array e substituidos com aqueles nao substituidos
+
+    Para desabilitar o botao apagar contatos a funcao verifica se nao tem nenhum item marcado se estiver algum marcado o botao e desabilitado
+
+    Filtros : Transformam o resultado de uma expressão, realizando operações como a formatação de data, a conversão de moeda e a ordenação de Array
+    {
+        uppercase : Transforma uma String em letras maiúscula, lembrando que nao altera o original apenas no local de exibição
+
+        lowercase : Transforma uma String em letras minúscula, lembrando que nao altera o original apenas no local de exibição
+
+        date : Formatar uma data usando máscara, se colocarmos dois pontos ":" podemos passar paranmetros
+
+        filter : Filtrar um Array com base em um critério 
+        {
+            Podento criar um input com ng-model e passando ele como um parametro do filtro assim a busca fica dinamica e podendo filtrar dentro o Array
+            Podemos também qual e o atributo que deseja filtrar se e sobre o nome ou operado sendo possivel com 
+
+                filter:{nome: criterioBusca}
+                -- assim ira filtrar apenas de acordo com o atributo desejado 
+        }
+
+        orderBy : Ordenar um array com base em um critoerio, podemos criar funcões na tela para ordenar de X maneiras, isso e possivel se linkar as funcoes com o
+        href, dessa maneira podemos criar dentro do href o click e chamando a função desejada assim podemos alterar os modos de ordenação da exibição da tabela
+        
+        orderBy também pode ser aplicada dentro do select, como esta acima dentro das devidas configurações
+
+        {
+            APLICAÇÃO
+
+                <th> <a href="" ng-click="ordenarPor('nome')">Nome </a></th>
+
+                <th> <a href="" ng-click="ordenarPor('telefone')">Telefone </a></th>
+
+
+            FUNÇÃO
+
+                $scope.ordenarPor = function(campo) {
+                $scope.criterioOrdenacao = campo;
+             }
+
+            CHAMADA
+
+                orderBy:criterioOrdenacao:true"
+        }        
+
+        currency : Converte um número para moeda 
+    }
+-->
