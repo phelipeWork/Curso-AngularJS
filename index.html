@@ -94,6 +94,18 @@
                 $scope.direcaoOrdenacao = !$scope.direcaoOrdenacao;
             }
 
+            $scope.Vazia = function(contatos){
+
+                var tam = contatos.length;
+
+                if (tam === 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }
+
         });
 
     </script>
@@ -101,7 +113,7 @@
 </head>
 
 <body ng-controller="listaTelefonicaCrtl" class="body">
-    
+
     <div class="jumbotron"> 
 
         <h3> {{app}} </h3>
@@ -120,8 +132,13 @@
             <td>{{contato.telefone}}</td>
             <td>{{contato.operadora.nome | lowercase}}</td>
             <td>{{contato.data | date:'dd/MM/yyyy'}}</td>
-        </tr>
+        </tr>      
         </table>
+        
+        <div ng-show="Vazia(contatos)">
+            Lista não possui registros.
+        </div>
+
         <hr/>
 
         <form name="contatoForm">
@@ -149,7 +166,7 @@
         </div>
 
         <div ng-show="contatoForm.telefone.$error.pattern" class="alert alert-danger"> 
-                O campo "Telefone" deve ter o formato DDDDD-DDDD.
+            O campo "Telefone" deve ter o formato DDDDD-DDDD.
         </div>
 
         <button class="btn btn-primary btn-block" ng-click="adicionarContato(contato)" ng-disabled="contatoForm.$invalid"> Adicionar Contato </button>
@@ -283,4 +300,7 @@
 
         currency : Converte um número para moeda 
     }
+
+        testando git++++++++++++++++++++++++++++++++++++++++++++++
+
 -->
